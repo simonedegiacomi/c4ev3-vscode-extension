@@ -10,6 +10,8 @@ export async function createProject() {
     workspace.fs.createDirectory(projectDirectory);
     await initializeProjectDirectory(projectDirectory);
 
+    // TODO: Copy include and ibev3api.a in project folder
+
     await commands.executeCommand('vscode.openFolder', projectDirectory);
 }
 

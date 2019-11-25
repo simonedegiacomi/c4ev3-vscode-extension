@@ -12,7 +12,8 @@
 	"activationEvents": [
 		"onCommand:extension.createNewProject",
 		"onCommand:extension.buildUploadRun",
-		"onCommand:extension.buildUpload"
+		"onCommand:extension.buildUpload",
+		"onCommand:extension.showEnvironment"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -28,6 +29,10 @@
 			{
 				"command": "extension.buildUpload",
 				"title": "C4EV3: Build and Upload"
+			},
+			{
+				"command": "extension.showEnvironment",
+				"title": "C4EV3: Show Environment"
 			}
 		]
 	},
