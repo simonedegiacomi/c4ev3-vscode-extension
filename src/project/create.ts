@@ -10,7 +10,6 @@ export async function createProject() {
     workspace.fs.createDirectory(projectDirectory);
     await initializeProjectDirectory(projectDirectory);
 
-    // TODO: Open workspace
     await commands.executeCommand('vscode.openFolder', projectDirectory);
 }
 
@@ -87,7 +86,7 @@ async function createCCppExtensionConfigFile(vscodeDirectory: Uri) {
                 "name": "Linux",
                 "includePath": [
                     "${workspaceFolder}/**",
-                    "/home/simone/Workspaces/EV3-API/include"
+                    "/home/simone/Workspaces/GSoC/EV3-API/include"
                 ],
                 "defines": [],
                 "compilerPath": "/usr/bin/arm-linux-gnueabi-gcc",
@@ -96,9 +95,9 @@ async function createCCppExtensionConfigFile(vscodeDirectory: Uri) {
                 "intelliSenseMode": "clang-x64",
                 "compilerArgs": [
                     "-I",
-                    "/home/simone/Workspaces/EV3-API/include",
+                    "/home/simone/Workspaces/GSoC/EV3-API/include",
                     "-L",
-                    "/home/simone/Workspaces/EV3-API",
+                    "/home/simone/Workspaces/GSoC/EV3-API",
                     "-l",
                     "ev3api"
                 ]
@@ -112,13 +111,12 @@ async function createLaunchFile(vscodeDirectory: Uri) {
     await writeJsonFile(appendFileToUri(vscodeDirectory, 'launch.json'), {});
 }
 async function createMainCFile(workspaceDirectory: Uri) {
-    await workspace.fs.writeFile(appendFileToUri(workspaceDirectory, 'main.c'), stringToUint8Array(`
-        #include<ev3.h>
-
-        int main() {
-            return 0;
-        }
-    `));
+    await workspace.fs.writeFile(appendFileToUri(workspaceDirectory, 'main.c'), stringToUint8Array(
+        "#include <ev3.h>\n\n" +
+        "int main() {\n" +
+        "   return 0;\n" +
+        "}"
+    ));
 }
 
 
@@ -132,58 +130,9 @@ async function writeJsonFile(file: Uri, json: any) {
 }
 
 function jsonToUint8Array(json: any): Uint8Array {
-    return stringToUint8Array(JSON.stringify(json));
+    return stringToUint8Array(JSON.stringify(json, null, 4));
 }
 
 function stringToUint8Array(str: string): Uint8Array {
     return new TextEncoder().encode(str);
 }
-
-/*
-function buildProject () {
-    vscode.window.withProgress({
-        location: ProgressLocation.Notification,
-        title: "I am long running!",
-        cancellable: true
-    }, async (progress:any, token:any) => {
-        token.onCancellationRequested(() => {
-            console.log("User canceled the long running operation");
-        });
-
-        progress.report({ increment: 0 });
-
-
-        await vscode.workspace.saveAll();
-
-        progress.report({ increment: 10 });
-
-        const workspaceRoot = vscode.workspace.workspaceFolders!![0].uri.path;
-        const compiler = new SourceCompiler();
-
-
-        await compiler.compile(workspaceRoot);
-
-
-        progress.report({ increment: 30 }); // 40%
-
-
-        const rbfBuilder = new RbfBuilder();
-        await rbfBuilder.build(workspaceRoot);
-        console.log('rbf built');
-
-        progress.report({ increment: 10 }); // 50%
-
-        const ev3 = EV3DuderEV3.build();
-        //await ev3.beep(workspaceRoot);
-        await ev3.upload(workspaceRoot, 'a.out', '../prjs/BrkProg_SAVE/a.elf');
-        progress.report({ increment: 25 }); // 50%
-        await ev3.upload(workspaceRoot, 'a.rbf', '../prjs/BrkProg_SAVE/a.rbf');
-        progress.report({ increment: 25 }); // 100%
-
-        await ev3.run(workspaceRoot, '../prjs/BrkProg_SAVE/a.rbf');
-
-        vscode.window.showInformationMessage('Done!', 'Ok', 'Run');
-
-    });
-}
-*/

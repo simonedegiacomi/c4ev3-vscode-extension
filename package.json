@@ -11,8 +11,8 @@
 	],
 	"activationEvents": [
 		"onCommand:extension.createNewProject",
-		"onCommand:extension.buildDownloadRun",
-		"onCommand:extension.buildDownload"
+		"onCommand:extension.buildUploadRun",
+		"onCommand:extension.buildUpload"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -22,12 +22,12 @@
 				"title": "C4EV3: Create new project"
 			},
 			{
-				"command": "extension.buildDownloadRun",
-				"title": "C4EV3: Build, Download and Run"
+				"command": "extension.buildUploadRun",
+				"title": "C4EV3: Build, Upload and Run"
 			},
 			{
-				"command": "extension.buildDownload",
-				"title": "C4EV3: Build and Download"
+				"command": "extension.buildUpload",
+				"title": "C4EV3: Build and Upload"
 			}
 		]
 	},

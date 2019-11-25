@@ -1,24 +1,15 @@
 import { ExtensionContext, commands } from 'vscode';
-import { createProject } from './project';
+import { createProject } from './project/create';
+import { buildProject } from './project/build';
+import { runProject } from './project/run';
+import { uploadProject } from './project/upload';
 
 // this method is called when your extension is activated
 export function activate(context: ExtensionContext) {
 
-
-
-	async function buildProject() {
-		console.log('building project...');
-	}
-	async function runProject() {
-		console.log('runnign project...');
-	}
-
 	context.subscriptions.push(commands.registerCommand('extension.createNewProject', createProject));
-	context.subscriptions.push(commands.registerCommand('extension.buildDownload', buildProject));
-	context.subscriptions.push(commands.registerCommand('extension.buildDownloadRun', async () => {
-		await buildProject();
-		await runProject();
-	}));
+	context.subscriptions.push(commands.registerCommand('extension.buildUpload', buildAndUpload));
+	context.subscriptions.push(commands.registerCommand('extension.buildUploadRun', buildUploadAndRun));
 
 	// DONE: intellisense
 	// POSTPONED: compile all c files (one executable per main)
@@ -32,3 +23,13 @@ export function activate(context: ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export function deactivate() { }
+
+async function buildAndUpload () {
+	await buildProject();
+	await uploadProject();
+}
+
+async function buildUploadAndRun() {
+	await buildAndUpload();
+	await runProject();
+}
