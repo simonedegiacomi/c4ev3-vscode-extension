@@ -1,4 +1,4 @@
-# C4EV3 Visual Studio Code Extension
+# C4EV3 Visual Studio Code Extension [![Build Status](https://travis-ci.org/simonedegiacomi/c4ev3-vscode-extension.svg?branch=master)](https://travis-ci.org/simonedegiacomi/c4ev3-vscode-extension)
 
 This extension amis to simplify the development of C4ev3-based projects using Visual Studio Code.
 
@@ -10,6 +10,7 @@ This extension amis to simplify the development of C4ev3-based projects using Vi
 - [ ] automatically discover gcc path
 - [ ] automatically discover ev3duder
 - [ ] C++ support
+- [ ] add instructions in README
 - [ ] publish extension
 
 # How to use
