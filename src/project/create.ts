@@ -1,26 +1,22 @@
 import { window, workspace, commands, Uri } from 'vscode';
-import { TextEncoder } from 'util';
+import { appendFileToUri, writeJsonFile, stringToUint8Array, getPathFromUri } from './utils';
+import * as AdmZip from 'adm-zip';
 
-export async function createProject() {
-    const projectDirectory = await askProjectDirectory();
-    if (!projectDirectory) {
+export async function createProject(extensionDirectory: Uri) {
+    const projectPath = await askProjectPath();
+    if (!projectPath) {
         return;
     }
-
-    workspace.fs.createDirectory(projectDirectory);
-    await initializeProjectDirectory(projectDirectory);
-
-    // TODO: Copy include and ibev3api.a in project folder
-
-    await commands.executeCommand('vscode.openFolder', projectDirectory);
+    await createProjectDirectory(projectPath, extensionDirectory);
+    await openProjectDirectory(projectPath);
 }
 
-async function askProjectDirectory(): Promise<Uri | undefined> {
+async function askProjectPath(): Promise<Uri | undefined> {
     const projectName = await askProjectName();
     if (!projectName) {
         return undefined;
     }
-    const parentDirectory = await askParentDifrectory();
+    const parentDirectory = await askParentDirectory();
     if (!parentDirectory) {
         return undefined;
     }
@@ -42,7 +38,7 @@ async function askProjectName(): Promise<string | undefined> {
     });
 }
 
-async function askParentDifrectory(): Promise<Uri | undefined> {
+async function askParentDirectory(): Promise<Uri | undefined> {
     // TODO: Ask where
     const pickedFolders = await window.showOpenDialog({
         canSelectFiles: false,
@@ -56,12 +52,18 @@ async function askParentDifrectory(): Promise<Uri | undefined> {
     return pickedFolders[0];
 }
 
-async function initializeProjectDirectory(workspace: Uri) {
+async function createProjectDirectory(projectPath: Uri, extensionDirectory: Uri) {
+    await workspace.fs.createDirectory(projectPath);
+    await createVSCodeDirectory(projectPath);
+    await createLibsDirectory(projectPath, extensionDirectory);
+    await createMainCFile(projectPath);
+}
+
+async function createVSCodeDirectory(workspace: Uri) {
     const vscodeDirectory = await createVSCodeSubDirectory(workspace);
     await createRecommendedExtensionsFile(vscodeDirectory);
     await createCCppExtensionConfigFile(vscodeDirectory);
     await createLaunchFile(vscodeDirectory);
-    await createMainCFile(workspace);
 }
 
 
@@ -88,21 +90,11 @@ async function createCCppExtensionConfigFile(vscodeDirectory: Uri) {
                 "name": "Linux",
                 "includePath": [
                     "${workspaceFolder}/**",
-                    "/home/simone/Workspaces/GSoC/EV3-API/include"
+                    "lib/c4ev3/include"
                 ],
-                "defines": [],
-                "compilerPath": "/usr/bin/arm-linux-gnueabi-gcc",
                 "cStandard": "c11",
                 "cppStandard": "c++17",
-                "intelliSenseMode": "clang-x64",
-                "compilerArgs": [
-                    "-I",
-                    "/home/simone/Workspaces/GSoC/EV3-API/include",
-                    "-L",
-                    "/home/simone/Workspaces/GSoC/EV3-API",
-                    "-l",
-                    "ev3api"
-                ]
+                "intelliSenseMode": "clang-x64"
             }
         ],
         "version": 4
@@ -112,6 +104,24 @@ async function createCCppExtensionConfigFile(vscodeDirectory: Uri) {
 async function createLaunchFile(vscodeDirectory: Uri) {
     await writeJsonFile(appendFileToUri(vscodeDirectory, 'launch.json'), {});
 }
+
+async function createLibsDirectory(workspaceDirectory: Uri, extensionDirectory: Uri) {
+    const libsDirectory = appendFileToUri(workspaceDirectory, 'libs');
+    await workspace.fs.createDirectory(libsDirectory);
+    await extractC4ev3IntoDirectory(libsDirectory, extensionDirectory);
+}
+
+function extractC4ev3IntoDirectory(destination: Uri, extensionDirectory: Uri): Promise<any> {
+    return new Promise((resolve, reject) => {
+        const archivePath = appendFileToUri(extensionDirectory, 'c4ev3.zip');
+        const archive = new AdmZip(getPathFromUri(archivePath));
+        archive.extractAllToAsync(getPathFromUri(destination), false, error => {
+            // TODO: Handle error
+            resolve();
+        });
+    });
+}
+
 async function createMainCFile(workspaceDirectory: Uri) {
     await workspace.fs.writeFile(appendFileToUri(workspaceDirectory, 'main.c'), stringToUint8Array(
         "#include <ev3.h>\n\n" +
@@ -121,20 +131,6 @@ async function createMainCFile(workspaceDirectory: Uri) {
     ));
 }
 
-
-function appendFileToUri(uri: Uri, file: string) {
-    return Uri.parse(`${uri.toString()}/${file}`);
-}
-
-
-async function writeJsonFile(file: Uri, json: any) {
-    await workspace.fs.writeFile(file, jsonToUint8Array(json));
-}
-
-function jsonToUint8Array(json: any): Uint8Array {
-    return stringToUint8Array(JSON.stringify(json, null, 4));
-}
-
-function stringToUint8Array(str: string): Uint8Array {
-    return new TextEncoder().encode(str);
+async function openProjectDirectory(projectPath: Uri) {
+    await commands.executeCommand('vscode.openFolder', projectPath);
 }

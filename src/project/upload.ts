@@ -1,15 +1,15 @@
-import { exec, getWorkspaceRoot } from "../utils";
+import { exec, getWorkspaceRoot, getProjectName, getEv3duderPath } from "../utils";
 
 
 export async function uploadProject() {
     const projectRoot = getWorkspaceRoot();
-    const projectName = 'a';
+    const projectName = getProjectName();
     await upload(`${projectRoot}/${projectName}.out`, `../prjs/${projectName}/${projectName}.elf`);
     await upload(`${projectRoot}/${projectName}.rbf`, `../prjs/${projectName}/${projectName}.rbf`);
 }
 
 async function upload(localFile: string, remoteFile: string) {
-    await exec('/home/simone/Workspaces/GSoC/ev3duder/ev3duder', getWorkspaceRoot(), [
+    await exec(getEv3duderPath(), getWorkspaceRoot(), [
         'up',
         localFile,
         remoteFile

@@ -1,5 +1,5 @@
 import { workspace } from 'vscode';
-import { getWorkspaceRoot, exec } from '../utils';
+import { getWorkspaceRoot, exec, getEv3duderPath, getProjectName, getCStandardLibrary, getCompilerPathPrefix } from '../utils';
 
 export async function buildProject() {
     await workspace.saveAll(); // TODO: Move somewhere else
@@ -8,18 +8,19 @@ export async function buildProject() {
 }
 
 async function compile() {
-    await exec('arm-linux-gnueabi-gcc', getWorkspaceRoot(),[
+    await exec(`${getCompilerPathPrefix()}`, getWorkspaceRoot(),[
         'main.c',
-        '-I', '/home/simone/Workspaces/GSoC/EV3-API/include',
-        '-L', '/home/simone/Workspaces/GSoC/EV3-API',
+        '-I', 'lib/c4ev3/include',
+        '-L', `lib/c4ev3/${getCStandardLibrary()}`,
         '-l', 'ev3api'
     ]);
 }
 
 async function buildRbf() {
-    await exec('/home/simone/Workspaces/GSoC/ev3duder/ev3duder', getWorkspaceRoot(), [
+    const projectName = getProjectName();
+    await exec(getEv3duderPath(), getWorkspaceRoot(), [
         'mkrbf',
-        '../prjs/a/a.elf', 'a.rbf'
+        `../prjs/${projectName}/${projectName}.elf`, `${projectName}.rbf`
     ]);
 }
 

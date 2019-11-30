@@ -1,18 +1,22 @@
-import { ExtensionContext, commands } from 'vscode';
+import { ExtensionContext, commands, workspace, window, ConfigurationTarget, Uri } from 'vscode';
 import { createProject } from './project/create';
 import { buildProject } from './project/build';
 import { runProject } from './project/run';
 import { uploadProject } from './project/upload';
-import { verifyAndPrepareEnvironment } from './environment/prepare';
 
 // this method is called when your extension is activated
 export function activate(context: ExtensionContext) {
-	registerCommandWithVerification('extension.createNewProject', createProject);
+
+	// TODO: check if environment is ready
+		// TODO: Check if we have the latest version of c4ev3
+			// TODO: Download if not
+		// TODO: Check if we have ev3duder
+			// Download if not
+	// TODO: When creating a project, copy c4ev3
+
+	registerCommandWithVerification('extension.createNewProject', () => createProject(Uri.file(context.extensionPath)));
 	registerCommandWithVerification('extension.buildUpload', buildAndUpload);
 	registerCommandWithVerification('extension.buildUploadRun', buildUploadAndRun);
-	registerCommand('extension.showEnvironment', async () => {
-		// TODO: Show environemnt (compiler version, c4ev3 version, ...)
-	});
 
 	function registerCommandWithVerification(name: string, handler: () => Promise<void>) {
 		registerCommand(name, verifyEnvironmentAndThen(handler));
@@ -29,7 +33,7 @@ export function deactivate() { }
 
 function verifyEnvironmentAndThen(callback: () => Promise<void>): () => Promise<void> {
 	return async () => {
-		await verifyAndPrepareEnvironment();
+		// TODO: Verify environment
 		await callback();
 	};
 }
@@ -43,3 +47,10 @@ async function buildUploadAndRun() {
 	await buildAndUpload();
 	await runProject();
 }
+
+
+// TODO: release c4ev3 automatically
+// include/
+// lib/
+//		uclibc/
+//		glibc/

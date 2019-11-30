@@ -19,3 +19,20 @@ export async function exec(executable: string, cwd: string, args: string[]): Pro
 export function getWorkspaceRoot() {
     return workspace.workspaceFolders!![0].uri.path;
 }
+
+export function getCompilerPathPrefix() {
+    return "arm-linux-gnueabi-";
+}
+
+export function getEv3duderPath() {
+    return "ev3duder";
+}
+
+export function getProjectName() {
+    return "b";
+}
+
+export function getCStandardLibrary(){
+    return "glibc";
+}
+

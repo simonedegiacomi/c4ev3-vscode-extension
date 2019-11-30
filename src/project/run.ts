@@ -1,11 +1,12 @@
-import { exec, getWorkspaceRoot } from "../utils";
+import { exec, getWorkspaceRoot, getEv3duderPath, getProjectName } from "../utils";
 
 export async function runProject(){
-    run('../prjs/a/a.rbf');
+    const projectName = getProjectName();
+    run(`../prjs/${projectName}/${projectName}.rbf`);
 }
 
 async function run(file: string) {
-    await exec('/home/simone/Workspaces/GSoC/ev3duder/ev3duder', getWorkspaceRoot(), [
+    await exec(getEv3duderPath(), getWorkspaceRoot(), [
         'run',
         file
     ]);
