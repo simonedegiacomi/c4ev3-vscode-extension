@@ -1,13 +1,14 @@
 import { window, workspace, commands, Uri } from 'vscode';
 import { appendFileToUri, writeJsonFile, stringToUint8Array, getPathFromUri } from './utils';
 import * as AdmZip from 'adm-zip';
+import { Configuration } from '../Configuration';
 
-export async function createProject(extensionDirectory: Uri) {
+export async function createProject(configuration: Configuration) {
     const projectPath = await askProjectPath();
     if (!projectPath) {
         return;
     }
-    await createProjectDirectory(projectPath, extensionDirectory);
+    await createProjectDirectory(projectPath, configuration.extensionPath);
     await openProjectDirectory(projectPath);
 }
 
@@ -24,13 +25,13 @@ async function askProjectPath(): Promise<Uri | undefined> {
 }
 
 async function askProjectName(): Promise<string | undefined> {
-    // TODO: Ask name
     return await window.showInputBox({
         prompt: 'Enter new project name (then Enter to confirm, or ESc to exit)',
         validateInput(name: string): string | undefined {
             if (name.length === 0) {
                 return;
             }
+            // TODO: Improve check
             if (name.indexOf(' ') >= 0) {
                 return 'cannot contain spaces';
             }
@@ -39,7 +40,6 @@ async function askProjectName(): Promise<string | undefined> {
 }
 
 async function askParentDirectory(): Promise<Uri | undefined> {
-    // TODO: Ask where
     const pickedFolders = await window.showOpenDialog({
         canSelectFiles: false,
         canSelectFolders: true,
@@ -47,6 +47,7 @@ async function askParentDirectory(): Promise<Uri | undefined> {
     });
     if (!pickedFolders || pickedFolders.length !== 1) {
         console.log('create project cancelled');
+        // TODO: Show user feedback
         return;
     }
     return pickedFolders[0];
@@ -90,11 +91,10 @@ async function createCCppExtensionConfigFile(vscodeDirectory: Uri) {
                 "name": "Linux",
                 "includePath": [
                     "${workspaceFolder}/**",
-                    "lib/c4ev3/include"
+                    "lib/c4ev3-v0.1.0/include" // TODO: remove version hardcoding
                 ],
                 "cStandard": "c11",
-                "cppStandard": "c++17",
-                "intelliSenseMode": "clang-x64"
+                "cppStandard": "c++17"
             }
         ],
         "version": 4
@@ -126,7 +126,9 @@ async function createMainCFile(workspaceDirectory: Uri) {
     await workspace.fs.writeFile(appendFileToUri(workspaceDirectory, 'main.c'), stringToUint8Array(
         "#include <ev3.h>\n\n" +
         "int main() {\n" +
-        "   return 0;\n" +
+        "    LcdTextf(, 5, 5, \"Hello World!\");\n" +
+        "    Wait(5000);\n" + 
+        "    return 0;\n" +
         "}"
     ));
 }

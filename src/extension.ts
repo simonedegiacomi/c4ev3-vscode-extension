@@ -1,22 +1,16 @@
 import { ExtensionContext, commands, workspace, window, ConfigurationTarget, Uri } from 'vscode';
-import { createProject } from './project/create';
-import { buildProject } from './project/build';
-import { runProject } from './project/run';
-import { uploadProject } from './project/upload';
+import { createProject } from './workspace/create';
+import { buildProject } from './workspace/build';
+import { runProject } from './workspace/run';
+import { uploadProject } from './workspace/upload';
+import { Configuration } from './Configuration';
 
-// this method is called when your extension is activated
 export function activate(context: ExtensionContext) {
+	const configuration = new Configuration(context);
 
-	// TODO: check if environment is ready
-		// TODO: Check if we have the latest version of c4ev3
-			// TODO: Download if not
-		// TODO: Check if we have ev3duder
-			// Download if not
-	// TODO: When creating a project, copy c4ev3
-
-	registerCommandWithVerification('extension.createNewProject', () => createProject(Uri.file(context.extensionPath)));
-	registerCommandWithVerification('extension.buildUpload', buildAndUpload);
-	registerCommandWithVerification('extension.buildUploadRun', buildUploadAndRun);
+	registerCommandWithVerification('extension.createNewProject', () => createProject(configuration));
+	registerCommandWithVerification('extension.buildUpload', () => buildAndUpload(configuration));
+	registerCommandWithVerification('extension.buildUploadRun', () => buildUploadAndRun(configuration));
 
 	function registerCommandWithVerification(name: string, handler: () => Promise<void>) {
 		registerCommand(name, verifyEnvironmentAndThen(handler));
@@ -27,9 +21,7 @@ export function activate(context: ExtensionContext) {
 	}
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() { }
-
 
 function verifyEnvironmentAndThen(callback: () => Promise<void>): () => Promise<void> {
 	return async () => {
@@ -38,19 +30,13 @@ function verifyEnvironmentAndThen(callback: () => Promise<void>): () => Promise<
 	};
 }
 
-async function buildAndUpload() {
-	await buildProject();
-	await uploadProject();
+async function buildAndUpload(configuration: Configuration) {
+	await workspace.saveAll();
+	await buildProject(configuration);
+	await uploadProject(configuration);
 }
 
-async function buildUploadAndRun() {
-	await buildAndUpload();
-	await runProject();
+async function buildUploadAndRun(configuration: Configuration) {
+	await buildAndUpload(configuration);
+	await runProject(configuration);
 }
-
-
-// TODO: release c4ev3 automatically
-// include/
-// lib/
-//		uclibc/
-//		glibc/

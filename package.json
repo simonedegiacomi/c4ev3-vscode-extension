@@ -43,10 +43,17 @@
 			"title": "c4ev3",
 			"properties": {
 				"c4ev3.compilerPathPrefix": {
+
 					"type": "string",
 					"default": "arm-linux-gnueabi-",
-					"description": "...",
-					"scope": "resource"
+					"markdownDescription": "...",
+					"scope": "machine-overridable"
+				},
+				"c4ev3.ev3duderPath": {
+					"type": "string",
+					"default": "ev3",
+					"markdownDescription": "...",
+					"scope": "machine-overridable"
 				}
 			}
 		}
