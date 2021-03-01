@@ -8,9 +8,9 @@ import { Configuration } from './Configuration';
 export function activate(context: ExtensionContext) {
 	const configuration = new Configuration(context);
 
-	registerCommandWithVerification('extension.createNewProject', () => createProject(configuration));
-	registerCommandWithVerification('extension.buildUpload', () => buildAndUpload(configuration));
-	registerCommandWithVerification('extension.buildUploadRun', () => buildUploadAndRun(configuration));
+	registerCommandWithVerification('extension.createNewProject', wrapCommand(configuration, createProject));
+	registerCommandWithVerification('extension.buildUpload', wrapCommand(configuration, buildAndUpload));
+	registerCommandWithVerification('extension.buildUploadRun', wrapCommand(configuration, buildUploadAndRun));
 
 	function registerCommandWithVerification(name: string, handler: () => Promise<void>) {
 		registerCommand(name, verifyEnvironmentAndThen(handler));
@@ -22,6 +22,17 @@ export function activate(context: ExtensionContext) {
 }
 
 export function deactivate() { }
+
+function wrapCommand(config: Configuration, handler: (config: Configuration) => Promise<void>) {
+	return async () => {
+		try {
+			await handler(config)
+		} catch (e) {
+			console.error(e);
+      window.showErrorMessage(`${e.message}: ${e.stack}`);
+		}
+	};
+}
 
 function verifyEnvironmentAndThen(callback: () => Promise<void>): () => Promise<void> {
 	return async () => {
